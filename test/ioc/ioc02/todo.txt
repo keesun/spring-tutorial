@@ -1,0 +1,2 @@
+Extending Spring @Component
+Customizing Spring Component Scan

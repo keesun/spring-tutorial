@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc">
+
+	<bean id="userDao" class="chapter06.exercise.aop06.UserDaoJdbc">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean
+		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" />
+
+	<bean id="transactionPointcut" class="chapter06.exercise.aop06.NameMatchClassMethodPointcut">
+		<property name="mappedClassName" value="*ServiceImpl" />
+		<property name="mappedName" value="upgrade*" />
+	</bean>
+
+	<bean id="transactionAdvice" class="chapter06.exercise.aop06.TransactionAdvice">
+		<property name="transactionManager" ref="transactionManager" />
+	</bean>
+
+	<bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+		<property name="advice" ref="transactionAdvice" />
+		<property name="pointcut" ref="transactionPointcut" />
+	</bean>
+
+	<bean id="userService" class="chapter06.exercise.aop06.UserServiceImpl">
+		<property name="userDao" ref="userDao" />
+		<property name="mailSender" ref="mailSender" />
+	</bean>
+
+	<bean id="testUserService"
+		class="chapter06.exercise.aop06.UserServiceTest$TestUserServiceImpl"
+		parent="userService" />
+
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<jdbc:embedded-database type="HSQL" id="dataSource">
+		<jdbc:script location="member_table_1.sql" />
+	</jdbc:embedded-database>
+
+	<bean id="mailSender" class="chapter06.exercise.aop06.DummyMailSender" />
+
+</beans>
